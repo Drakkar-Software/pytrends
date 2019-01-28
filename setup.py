@@ -26,7 +26,7 @@ setup(
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
-        'License :: MIT License'
+        "License :: OSI Approved :: MIT License",
         ],
     install_requires=["requests"],
     keywords='google trends api search',

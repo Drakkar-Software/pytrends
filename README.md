@@ -1,4 +1,4 @@
-# pytrends
+# simplified pytrends
 
 Simplified version of https://github.com/GeneralMills/pytrends: removed pandas dependency.
 
