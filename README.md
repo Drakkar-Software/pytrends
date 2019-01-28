@@ -174,7 +174,7 @@ Returns a sorted list of dict: containing "timestamp" and "data"
 # Credits
 
 * Original pytrends lib:
-  - simplifiedpytrends
+  - https://github.com/GeneralMills/pytrends
 
 * Major JSON revision ideas taken from pat310's JavaScript library
 
