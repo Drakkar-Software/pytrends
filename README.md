@@ -1,5 +1,7 @@
 # pytrends
 
+Simplified version of https://github.com/GeneralMills/pytrends: removed pandas dependency.
+
 ## Introduction
 
 Unofficial API for Google Trends
@@ -18,13 +20,6 @@ Allows simple interface for automating downloading of reports from Google Trends
   * [Common API parameters](#common-api-parameters)
 
     * [Interest Over Time](#interest-over-time)
-    * [Historical Hourly Interest](#historical-hourly-interest)
-    * [Interest by Region](#interest-by-region)
-    * [Related Topics](#related-topics)
-    * [Related Queries](#related-queries)
-    * [Trending Searches](#trending-searches)
-    * [Top Charts](#top-charts)
-    * [Suggestions](#suggestions)
 
   * [Caveats](#caveats)
 
@@ -32,7 +27,7 @@ Allows simple interface for automating downloading of reports from Google Trends
 
 ## Installation
 
-    pip install pytrends
+    pip install simplifiedpytrends
 
 ## Requirements
 
@@ -45,14 +40,14 @@ Allows simple interface for automating downloading of reports from Google Trends
 
 ### Connect to Google
 
-    from pytrends.request import TrendReq
+    from simplifiedpytrends.request import TrendReq
 
     pytrends = TrendReq(hl='en-US', tz=360)
 
 or if you want to use proxies as you are blocked due to Google rate limit:
 
 
-    from pytrends.request import TrendReq
+    from simplifiedpytrends.request import TrendReq
 
     pytrends = TrendReq(hl='en-US', tz=360, proxies = {'https': 'https://34.203.233.13:80'})
 
@@ -77,20 +72,6 @@ Parameters
 The following API methods are available:
 
 * [Interest Over Time](#interest-over-time): returns historical, indexed data for when the keyword was searched most as shown on Google Trends' Interest Over Time section.
-
-* [Historical Hourly Interest](#historical-hourly-interest): returns historical, indexed, hourly data for when the keyword was searched most as shown on Google Trends' Interest Over Time section. It sends multiple requests to Google, each retrieving one week of hourly data. It seems like this would be the only way to get historical, hourly data. 
-
-* [Interest by Region](#interest-by-region): returns data for where the keyword is most searched as shown on Google Trends' Interest by Region section.
-
-* [Related Topics](#related-topics): returns data for the related keywords to a provided keyword shown on Google Trends' Related Topics section.
-
-* [Related Queries](#related-queries): returns data for the related keywords to a provided keyword shown on Google Trends' Related Queries section.
-
-* [Trending Searches](#trending-searches): returns data for latest trending searches shown on Google Trends' Trending Searches section.
-
-* [Top Charts](#top-charts): returns the data for a given topic shown in Google Trends' Top Charts section.
-
-* [Suggestions](#suggestions): returns a list of additional suggested keywords that can be used to refine a trend search.
 
 <sub><sup>[back to top](#api-methods)</sub></sup>
 
@@ -173,129 +154,12 @@ Many API methods use the following:
 
     pytrends.interest_over_time()
 
-Returns pandas.Dataframe
+Returns a sorted list of dict: containing "timestamp" and "data"
 
 <sub><sup>[back to top](#interest_over_time)</sub></sup>
 
 
-### Historical Hourly Interest
 
-    pytrends.get_historical_interest(kw_list, year_start=2018, month_start=1, day_start=1, hour_start=0, year_end=2018, month_end=2, day_end=1, hour_end=0, cat=0, geo='', gprop='', sleep=0)
-    
-Parameters 
-
-* `kw_list`
-
-  - *Required*
-  - list of keywords that you would like the historical data
-
-* `year_start, month_start, day_start, hour_start, year_end, month_end, day_end, hour_end`
-
-  - the time period for which you would like the historical data
-  
-* `sleep`
-
-  - If you are rate-limited by Google, you should set this parameter to something (i.e. 60) to space off each API call. 
-  
-Returns pandas.Dataframe
-
-<sub><sup>[back to top](#historical-hourly-interest)</sub></sup>
-
-### Interest by Region
-
-    pytrends.interest_by_region(resolution='COUNTRY', inc_low_vol=True, inc_geo_code=False)
-
-Parameters
-
-* `resolution`
-
-  - 'CITY' returns city level data
-  - 'COUNTRY' returns country level data
-  - 'DMA'  returns Metro level data
-  - 'REGION'  returns Region level data
-
-* `inc_low_vol`
-
-  - True/False (includes google trends data for low volume countries/regions as well)
-
-* `inc_geo_code`
-  
-  - True/False (includes ISO codes of countries along with the names in the data)
-
-Returns pandas.DataFrame
-
-<sub><sup>[back to top](#interest_by_region)</sub></sup>
-
-### Related Topics
-
-    pytrends.related_topics()
-
-Returns dictionary of pandas.DataFrames
-
-<sub><sup>[back to top](#related_topics)</sub></sup>
-
-### Related Queries
-
-    pytrends.related_queries()
-
-Returns dictionary of pandas.DataFrames
-
-<sub><sup>[back to top](#related_queries)</sub></sup>
-
-### Trending Searches
-
-	pytrends.trending_searches(pn='p1') # in English
-	pytrends.trending_searches(pn='p4') # in Japanese
-
-Returns pandas.DataFrame
-
-<sub><sup>[back to top](#trending_searches)</sub></sup>
-
-### Top Charts
-
-    pytrends.top_charts(date, cid, geo='US', cat='')
-
-Parameters
-
-* `date`
-
-  - *Required*
-  - YYYYMM integer or string value
-  - Example `'201611'` for November 2016 Top Chart data
-
-* `cid`
-
-  - *Required*
-  - Topic to get data for
-  - Only able to choose from those listed on https://www.google.com/trends/topcharts
-  - Example the chart 'Baseketball players `cid` is `'basketball_players'`
-
-Returns pandas.DataFrame
-
-<sub><sup>[back to top](#top_charts)</sub></sup>
-
-### Suggestions
-
-    pytrends.suggestions(keyword)
-
-Parameters
-
-* `keyword`
-
-  - *Required*
-  - keyword to get suggestions for
-
-Returns dictionary
-
-<sub><sup>[back to top](#suggestions)</sub></sup>
-
-### Categories
-
-    pytrends.categories()
-
-Returns dictionary
-
-<sub><sup>[back to top](#suggestions)</sub></sup>
 
 # Caveats
 
@@ -308,6 +172,9 @@ Returns dictionary
 * For certain configurations the dependency lib certifi requires the environment variable REQUESTS_CA_BUNDLE to be explicitly set and exported. This variable must contain the path where the ca-certificates are saved or a SSLError: [SSL: CERTIFICATE_VERIFY_FAILED] error is given at runtime. 
 
 # Credits
+
+* Original pytrends lib:
+  - simplifiedpytrends
 
 * Major JSON revision ideas taken from pat310's JavaScript library
 

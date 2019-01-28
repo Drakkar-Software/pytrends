@@ -8,14 +8,14 @@ with io.open(os.path.join(dir, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
 
 setup(
-    name='pytrends',
-    version='4.5.0',
-    description='Pseudo API for Google Trends',
+    name='simplifiedpytrends',
+    version='1.0.0',
+    description='Simplified Pseudo API for Google Trends',
     long_description=long_description,
     long_description_content_type='text/markdown',
-    url='https://github.com/dreyco676/pytrends',
-    author=['John Hogue', 'Burton DeWilde'],
-    author_email='dreyco676@gmail.com',
+    url='https://github.com/Drakkar-Software/pytrends',
+    author=['John Hogue', 'Burton DeWilde', 'DrakkarSoftware'],
+    author_email='drakkar.software@protonmail.com',
     license='Apache 2.0',
     classifiers=[
         'Development Status :: 4 - Beta',
@@ -25,9 +25,10 @@ setup(
         'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
-        'License :: OSI Approved :: MIT License'
+        'Programming Language :: Python :: 3.7',
+        'License :: MIT License'
         ],
-    install_requires=["requests", "pandas", 'lxml'],
+    install_requires=["requests"],
     keywords='google trends api search',
-    packages=['pytrends'],
+    packages=['simplifiedpytrends'],
 )
