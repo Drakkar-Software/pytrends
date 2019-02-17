@@ -37,7 +37,6 @@ Allows simple interface for automating downloading of reports from Google Trends
 * Written for both Python 2.7+ and Python 3.3+
 * Requires Requests
 
-<sub><sup>[back to top](#pytrends)</sub></sup>
 
 ## API
 
@@ -68,15 +67,11 @@ Parameters
   - Keywords to get data for
 
 
-<sub><sup>[back to top](#API)</sub></sup>
-
 ## API Methods
 
 The following API methods are available:
 
 * [Interest Over Time](#interest-over-time): returns historical, indexed data for when the keyword was searched most as shown on Google Trends' Interest Over Time section.
-
-<sub><sup>[back to top](#api-methods)</sub></sup>
 
 ## Common API parameters
 
@@ -151,16 +146,11 @@ Many API methods use the following:
   - Can be ```images```, ```news```, ```youtube``` or ```froogle``` (for Google Shopping results)
 
 
-<sub><sup>[back to top](#api-payload-keys)</sub></sup>
-
 ### Interest Over Time
 
     pytrends.interest_over_time()
 
 Returns a sorted list of dict: containing "timestamp" and "data"
-
-<sub><sup>[back to top](#interest_over_time)</sub></sup>
-
 
 
 
