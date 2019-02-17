@@ -1,0 +1,31 @@
+notifications:
+  email: false
+sudo: enabled
+os: linux
+language: python
+cache: pip
+python: 3.7-dev
+install:
+- python3 -m pip install -r requirements.txt
+matrix:
+  include:
+  - name: Linux - Python 3 nightly
+    os: linux
+    python: nightly
+    language: python
+    script:
+    - python3 setup.py sdist bdist_wheel && python3 -m twine check dist/*
+deploy:
+  - provider: pypi
+    user:
+      secure: i4uD5nwgADhrNwjERyWX0hmBGQcVCxkfjsHiGJbD4oMvoN5In8Zn2GK70N4rHIQF7LYAorXDO2bdlJwufHruCb2iysqRw1A+p25FodHtZs1V/SOGqT/0hTkv9685EkKzutgifNcIVhqI3x1tZqbxwoI7oh+NvVYF6G4pHd4oMTCao2PVyyXA2HQbBeuXhbLj7Vzfhj4rj9auvlomF9vnOPTyMdoG+4fTKrxyoLSHq6leRbkbLoktjtuY+cnx7+tIPHjROH32rDpY3oP+KnxUrMpeZ8IcRyB3CsUb5TWMigu1HGO/9PAFgMEvAe2AvDKIXoXWqdAej8ll2dz/x5DaA2YPPLRlvXdh4cdoiGzuim5swKKweajSIo5bxy1PXBP4cl9xxk1P6/FDciK3FCUl9/xtrUEiIYoPYyxYOKFaEohThxuSS52UrD4YSgWmlnC3oPMTZGAjDlchiWYmOFnIwHPq5pYeKwcgjcJM6nOTCE368XDJOkGPTAfn+0hL12pWbbYbetoW0MrUKKoVIv/GQ2Uh8+4DcWDoxNKUEY3Dfjs8SmL6fs86IySedoDMQStUjzjvkcCJnVMKs7o30jmatUto76+3m5uxcJeJkuvyMxmLKGmbT0TH1rjWeNVZxg9oNVaXEhOVHtQY1Kk26ngCRk7ysBf6VT5YQsQ6aLa7BOU=
+    password:
+      secure: UlwLJdulFr7jmhYXXwwgDt8jPnBGWHc3K/fJ6cyDsYfwPt+2/2XekauCch1wwshBAOvWARwpnrrh+KN5FKKxfVw/McUX0n/13vk47d4oTawuOTTUyHcuZPKmfoLNOl3T41UKnUx7Tom5J/IS/cj/mcuGWlkVgd0YzRxfjjAvLqPhGriRYdXQluZqmyOQee85RSfehCusCoWeTUudEFYYf4YbsAG9mVOs5hsYqbtsVGJR1SPQKo2fZAa5ESTaxGu6upXGMf7zcx/Ow6MRDcKAZvCNSkLlTBTEuY2rizDENgyHFeRPkEJfDh536gkWH7cBrQw+4yoZmKZskJxRhTlhA42IRSQ9wK0MQTDORV7zfKYULn0XozgudpzZJ5Ne7MpCZHQyYjo6ldC2b1NMH//E5GJdtQgTy+0KQoTPnaSmDVLdsq0r9lcKdK8VeEEc8b/rwsgXfXpU1Vbo3mlfECcJoC49lOWBKYbO2oOVA6//Tn0yvEhp2tKVgkToel+Vyu+uvhDzoU0kLyMC3tBh1b2bsiuOFccpTlJCgVWyGOnov4JzxjjD/4UFasxcSb+NqjzjuvRCFetnWDmKipKlRyu2c6b6s7UajJyJn3xS2FYbmleVocBIrIANbveZcmPdsAdJ29MFPaRiWVspVFMYHXhSP/y+JxvV06UIiDxc2yY2N2w=
+    skip_existing: true
+    skip_cleanup: true
+    distributions: sdist bdist_wheel
+    on:
+      repo: Drakkar-Software/simplifiedpytrends
+      branch: master
+      tags: true
+      condition: "$TRAVIS_OS_NAME = 'linux'"

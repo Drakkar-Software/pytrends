@@ -4,14 +4,17 @@ from setuptools import setup
 
 dir = os.path.dirname(__file__)
 
-with io.open(os.path.join(dir, 'README.md'), encoding='utf-8') as f:
-    long_description = f.read()
+# long description from README file
+with open('README.md', encoding='utf-8') as f:
+    DESCRIPTION = f.read()
+
+REQUIRED = open('requirements.txt').read()
 
 setup(
     name='simplifiedpytrends',
-    version='1.0.3',
+    version='1.0.4',
     description='Simplified Pseudo API for Google Trends',
-    long_description=long_description,
+    long_description=DESCRIPTION,
     long_description_content_type='text/markdown',
     url='https://github.com/Drakkar-Software/pytrends',
     author=['John Hogue', 'Burton DeWilde', 'DrakkarSoftware'],
@@ -28,7 +31,7 @@ setup(
         'Programming Language :: Python :: 3.7',
         "License :: OSI Approved :: MIT License",
         ],
-    install_requires=["requests"],
+    install_requires=REQUIRED,
     keywords='google trends api search',
     packages=['simplifiedpytrends'],
 )

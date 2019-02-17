@@ -32,7 +32,7 @@ Allows simple interface for automating downloading of reports from Google Trends
 ## Requirements
 
 * Written for both Python 2.7+ and Python 3.3+
-* Requires Requests, lxml, Pandas
+* Requires Requests
 
 <sub><sup>[back to top](#pytrends)</sub></sup>
 
