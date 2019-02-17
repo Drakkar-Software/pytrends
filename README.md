@@ -1,4 +1,7 @@
 # simplified pytrends
+[![PyPI](https://img.shields.io/pypi/v/simplifiedpytrends.svg)](https://pypi.python.org/pypi/simplifiedpytrends/)
+[![Downloads](https://pepy.tech/badge/simplifiedpytrends/month)](https://pepy.tech/project/simplifiedpytrends)
+[![Build Status](https://api.travis-ci.org/Drakkar-Software/simplifiedpytrends.svg?branch=master)](https://travis-ci.org/Drakkar-Software/simplifiedpytrends) 
 
 Simplified version of https://github.com/GeneralMills/pytrends: removed pandas dependency.
 
