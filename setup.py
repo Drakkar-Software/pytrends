@@ -1,5 +1,4 @@
 import os
-import io
 from setuptools import setup
 
 dir = os.path.dirname(__file__)
@@ -12,7 +11,7 @@ REQUIRED = open('requirements.txt').read()
 
 setup(
     name='simplifiedpytrends',
-    version='1.0.4',
+    version='1.1.0',
     description='Simplified Pseudo API for Google Trends',
     long_description=DESCRIPTION,
     long_description_content_type='text/markdown',

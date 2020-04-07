@@ -3,6 +3,7 @@ from __future__ import absolute_import, print_function, unicode_literals
 import json
 
 import requests
+import aiohttp
 
 from simplifiedpytrends import exceptions
 
@@ -31,6 +32,7 @@ class TrendReq(object):
         # google rate limit
         self.google_rl = 'You have reached your quota limit. Please try again later.'
         self.results = None
+        self.aiohttp_session = None
 
         # set user defined options used globally
         self.tz = tz
@@ -52,6 +54,29 @@ class TrendReq(object):
         self.related_topics_widget_list = list()
         self.related_queries_widget_list = list()
 
+    @staticmethod
+    def _handle_req_response(response, resp_text, trim_chars=0):
+        # check if the response contains json and throw an exception otherwise
+        # Google mostly sends 'application/json' in the Content-Type header,
+        # but occasionally it sends 'application/javascript
+        # and sometimes even 'text/javascript
+        if 'application/json' in response.headers['Content-Type'] or \
+                'application/javascript' in response.headers['Content-Type'] or \
+                'text/javascript' in response.headers['Content-Type']:
+
+            # trim initial characters
+            # some responses start with garbage characters, like ")]}',"
+            # these have to be cleaned before being passed to the json parser
+            content = resp_text[trim_chars:]
+
+            # parse json
+            return json.loads(content)
+        else:
+            # this is often the case when the amount of keywords in the payload for the IP
+            # is not allowed by Google
+            raise exceptions.ResponseError('The request failed: Google returned a '
+                                           'response with code {0}.'.format(response.status_code), response=response)
+
     def _get_data(self, url, method=GET_METHOD, trim_chars=0, **kwargs):
         """Send a request to Google and return the JSON response as a Python object
 
@@ -71,28 +96,29 @@ class TrendReq(object):
         else:
             response = s.get(url, cookies=self.cookies, **kwargs)
 
-        # check if the response contains json and throw an exception otherwise
-        # Google mostly sends 'application/json' in the Content-Type header,
-        # but occasionally it sends 'application/javascript
-        # and sometimes even 'text/javascript
-        if 'application/json' in response.headers['Content-Type'] or \
-            'application/javascript' in response.headers['Content-Type'] or \
-                'text/javascript' in response.headers['Content-Type']:
+        return TrendReq._handle_req_response(response, response.text, trim_chars=trim_chars)
 
-            # trim initial characters
-            # some responses start with garbage characters, like ")]}',"
-            # these have to be cleaned before being passed to the json parser
-            content = response.text[trim_chars:]
+    async def _async_get_data(self, url, method=GET_METHOD, trim_chars=0, aiohttp_session: aiohttp.ClientSession = None,
+                              **kwargs):
+        """Send a request to Google and return the JSON response as a Python object
 
-            # parse json
-            return json.loads(content)
+        :param url: the url to which the request will be sent
+        :param method: the HTTP method ('get' or 'post')
+        :param trim_chars: how many characters should be trimmed off the beginning of the content of the response
+            before this is passed to the JSON parser
+        :param kwargs: any extra key arguments passed to the request builder (usually query parameters or data)
+        :return:
+        """
+        aiohttp_session = aiohttp_session or self.aiohttp_session
+        headers = {'accept-language': self.hl}
+        if method == TrendReq.POST_METHOD:
+            async with aiohttp_session.post(url, cookies=self.cookies, headers=headers, **kwargs) as response:
+                return TrendReq._handle_req_response(response, await response.text(), trim_chars=trim_chars)
         else:
-            # this is often the case when the amount of keywords in the payload for the IP
-            # is not allowed by Google
-            raise exceptions.ResponseError('The request failed: Google returned a '
-                                           'response with code {0}.'.format(response.status_code), response=response)
+            async with aiohttp_session.get(url, cookies=self.cookies, headers=headers, **kwargs) as response:
+                return TrendReq._handle_req_response(response, await response.text(), trim_chars=trim_chars)
 
-    def build_payload(self, kw_list, cat=0, timeframe='today 5-y', geo='', gprop=''):
+    def _init_payload(self, kw_list, cat, timeframe, geo, gprop):
         """Create the payload for related queries, interest over time and interest by region"""
         self.kw_list = kw_list
         self.geo = geo
@@ -108,21 +134,35 @@ class TrendReq(object):
             self.token_payload['req']['comparisonItem'].append(keyword_payload)
         # requests will mangle this if it is not a string
         self.token_payload['req'] = json.dumps(self.token_payload['req'])
-        # get tokens
-        self._tokens()
         return
 
-    def _tokens(self):
+    async def async_build_payload(self, kw_list, cat=0, timeframe='today 5-y', geo='', gprop=''):
         """Makes request to Google to get API tokens for interest over time, interest by region and related queries"""
+        self._init_payload(kw_list, cat, timeframe, geo, gprop)
+        # make the token request and parse the returned json
+        widget_dict = (await self._async_get_data(
+            url=TrendReq.GENERAL_URL,
+            method=TrendReq.GET_METHOD,
+            params=self.token_payload,
+            trim_chars=4,
+        ))['widgets']
+        self._tokens(widget_dict)
+        return
 
-        # make the request and parse the returned json
+    def build_payload(self, kw_list, cat=0, timeframe='today 5-y', geo='', gprop=''):
+        """Makes request to Google to get API tokens for interest over time, interest by region and related queries"""
+        self._init_payload(kw_list, cat, timeframe, geo, gprop)
+        # make the token request and parse the returned json
         widget_dict = self._get_data(
             url=TrendReq.GENERAL_URL,
             method=TrendReq.GET_METHOD,
             params=self.token_payload,
             trim_chars=4,
         )['widgets']
+        self._tokens(widget_dict)
+        return
 
+    def _tokens(self, widget_dict):
         # order of the json matters...
         first_region_token = True
         # clear self.related_queries_widget_list and self.related_topics_widget_list
@@ -143,25 +183,8 @@ class TrendReq(object):
                 self.related_queries_widget_list.append(widget)
         return
 
-    # returns a list of dicts containing {"timestamp", "data"}
-    def interest_over_time(self):
-        """Request data from Google's Interest Over Time section and return a dataframe"""
-
-        over_time_payload = {
-            # convert to string as requests will mangle
-            'req': json.dumps(self.interest_over_time_widget['request']),
-            'token': self.interest_over_time_widget['token'],
-            'tz': self.tz
-        }
-
-        # make the request and parse the returned json
-        req_json = self._get_data(
-            url=TrendReq.INTEREST_OVER_TIME_URL,
-            method=TrendReq.GET_METHOD,
-            trim_chars=5,
-            params=over_time_payload,
-        )
-
+    @staticmethod
+    def _handle_interest_over_time(req_json):
         result_list = []
         timestamp_key = "timestamp"
         data_key = "data"
@@ -176,3 +199,41 @@ class TrendReq(object):
         sorted_result = sorted(result_list, key=lambda a: a[timestamp_key])
 
         return sorted_result
+
+    def _get_over_time_payload(self):
+        return {
+            # convert to string as requests will mangle
+            'req': json.dumps(self.interest_over_time_widget['request']),
+            'token': self.interest_over_time_widget['token'],
+            'tz': self.tz
+        }
+
+    # returns a list of dicts containing {"timestamp", "data"}
+    def interest_over_time(self):
+        """Request data from Google's Interest Over Time section and return a dataframe"""
+
+        over_time_payload = self._get_over_time_payload()
+
+        # make the request and parse the returned json
+        req_json = self._get_data(
+            url=TrendReq.INTEREST_OVER_TIME_URL,
+            method=TrendReq.GET_METHOD,
+            trim_chars=5,
+            params=over_time_payload,
+        )
+        return TrendReq._handle_interest_over_time(req_json)
+
+    # returns a list of dicts containing {"timestamp", "data"}
+    async def async_interest_over_time(self):
+        """Request data from Google's Interest Over Time section and return a dataframe"""
+
+        over_time_payload = self._get_over_time_payload()
+
+        # make the request and parse the returned json
+        req_json = await self._async_get_data(
+            url=TrendReq.INTEREST_OVER_TIME_URL,
+            method=TrendReq.GET_METHOD,
+            trim_chars=5,
+            params=over_time_payload,
+        )
+        return TrendReq._handle_interest_over_time(req_json)
