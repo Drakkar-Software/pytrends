@@ -1,26 +1,31 @@
 notifications:
   email: false
-sudo: enabled
+dist: xenial
 os: linux
 language: python
+python: 3.8-dev
 cache: pip
-python: 3.7-dev
+env:
+  global:
+  - GH_REPO=Drakkar-Software/simplifiedpytrends
+  - DEPLOY_BRANCH=master
+  - PACKAGE_FOLDER=simplifiedpytrends
 install:
 - python3 -m pip install -r requirements.txt -r dev_requirements.txt
-matrix:
+jobs:
   include:
-  - name: Linux - Python 3 nightly
+  - name: Linux - Python 3.8-dev - Python sources
+    stage: test
     os: linux
-    python: nightly
+    python: 3.8-dev
     language: python
     script:
     - python3 setup.py sdist bdist_wheel && python3 -m twine check dist/*
 deploy:
   - provider: pypi
-    user:
-      secure: i4uD5nwgADhrNwjERyWX0hmBGQcVCxkfjsHiGJbD4oMvoN5In8Zn2GK70N4rHIQF7LYAorXDO2bdlJwufHruCb2iysqRw1A+p25FodHtZs1V/SOGqT/0hTkv9685EkKzutgifNcIVhqI3x1tZqbxwoI7oh+NvVYF6G4pHd4oMTCao2PVyyXA2HQbBeuXhbLj7Vzfhj4rj9auvlomF9vnOPTyMdoG+4fTKrxyoLSHq6leRbkbLoktjtuY+cnx7+tIPHjROH32rDpY3oP+KnxUrMpeZ8IcRyB3CsUb5TWMigu1HGO/9PAFgMEvAe2AvDKIXoXWqdAej8ll2dz/x5DaA2YPPLRlvXdh4cdoiGzuim5swKKweajSIo5bxy1PXBP4cl9xxk1P6/FDciK3FCUl9/xtrUEiIYoPYyxYOKFaEohThxuSS52UrD4YSgWmlnC3oPMTZGAjDlchiWYmOFnIwHPq5pYeKwcgjcJM6nOTCE368XDJOkGPTAfn+0hL12pWbbYbetoW0MrUKKoVIv/GQ2Uh8+4DcWDoxNKUEY3Dfjs8SmL6fs86IySedoDMQStUjzjvkcCJnVMKs7o30jmatUto76+3m5uxcJeJkuvyMxmLKGmbT0TH1rjWeNVZxg9oNVaXEhOVHtQY1Kk26ngCRk7ysBf6VT5YQsQ6aLa7BOU=
+    user: __token__
     password:
-      secure: UlwLJdulFr7jmhYXXwwgDt8jPnBGWHc3K/fJ6cyDsYfwPt+2/2XekauCch1wwshBAOvWARwpnrrh+KN5FKKxfVw/McUX0n/13vk47d4oTawuOTTUyHcuZPKmfoLNOl3T41UKnUx7Tom5J/IS/cj/mcuGWlkVgd0YzRxfjjAvLqPhGriRYdXQluZqmyOQee85RSfehCusCoWeTUudEFYYf4YbsAG9mVOs5hsYqbtsVGJR1SPQKo2fZAa5ESTaxGu6upXGMf7zcx/Ow6MRDcKAZvCNSkLlTBTEuY2rizDENgyHFeRPkEJfDh536gkWH7cBrQw+4yoZmKZskJxRhTlhA42IRSQ9wK0MQTDORV7zfKYULn0XozgudpzZJ5Ne7MpCZHQyYjo6ldC2b1NMH//E5GJdtQgTy+0KQoTPnaSmDVLdsq0r9lcKdK8VeEEc8b/rwsgXfXpU1Vbo3mlfECcJoC49lOWBKYbO2oOVA6//Tn0yvEhp2tKVgkToel+Vyu+uvhDzoU0kLyMC3tBh1b2bsiuOFccpTlJCgVWyGOnov4JzxjjD/4UFasxcSb+NqjzjuvRCFetnWDmKipKlRyu2c6b6s7UajJyJn3xS2FYbmleVocBIrIANbveZcmPdsAdJ29MFPaRiWVspVFMYHXhSP/y+JxvV06UIiDxc2yY2N2w=
+      secure: fSkyL3XwJj8f/4oN/A3gmePvPfFqB4kRuaGDQBUMjcwL9+LUl4Y5BpSDU+zmx2uKjbdMiyHXMzuHuZOud5DyXN/cHlGeyu0GC2Gn1ot5V/M0N8SXjEKfPyOeHcFHk1Lv2QPMBT+XV6S7DXlF1IV4/Q6E8el3If5b9FRaFGAsHQgsR5PbrYSBhLJnHVEQRT2nGR+S/XL6eYkfI/x8CogQaXPlXEoOaRAQoS2tYDHqyeeiGOqBcazmx6/GIeSrK82ktR9ZuZtKCPhp1wKHSt/9MxY0ZjWWU8Smp7oDdD1dNfybXTUd9TSqzxdoWwk6/OoS5icZ+rLSZ8KJeEvRXV7g72zRmEuzcXHXzMq3QHhGZuUNmJekKoKvzaXgpbzQOwyMnUN2CxcKlj+6T3cm2gWU0p2c4uTrRh2MaI/2DPlc0nUmCNrtkwg5e/TX5zp+t/qgJegNgHOU+nwZ9yW2aR35hX5gI6V9Ry3Yh3wU9jnCBbECymIbJBf3aGh7hKfZCbBFsIXJZfao054Edu/0eyRd6HJXn6PvrqsxtL4MFP9Z8Zeekp1IhZHDA9mpxuPqVBAnIUwSCnC30NdIpjqhy0vEpJbb+Sbelp80H57CNS/K9ax8h/V/eqPONa/y3dEub3HBDzbv6+2SQAtzsge6YaV48jlzwf2ssR672scy8YC4vI8=
     skip_existing: true
     skip_cleanup: true
     distributions: sdist bdist_wheel
